@@ -99,7 +99,7 @@ class _CurvedNavBarState extends State<CurvedNavBar> {
         children: [
           // Background navbar
           CustomPaint(
-            size: const Size(double.infinity, 100),
+            size: const Size(double.infinity, 90),
             painter: _NavBarPainter(),
           ),
 
@@ -128,7 +128,7 @@ class _CurvedNavBarState extends State<CurvedNavBar> {
 
           // Icon buttons
           Positioned.fill(
-            top: 140 / 2,
+            top: 125 / 2,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -148,7 +148,7 @@ class _CurvedNavBarState extends State<CurvedNavBar> {
           // Tombol tengah
           Positioned(
             left: MediaQuery.of(context).size.width * 0.5 - 28,
-            top: 32,
+            top: 38,
             child: Container(
               width: 56,
               height: 56,
@@ -225,7 +225,7 @@ class _NavBarPainter extends CustomPainter {
     final path = Path();
 
     final barHeight = size.height;
-    final curveTop = 45.0;
+    final curveTop = 30.0;
     final radius = 16.0;
     final width = size.width;
     final centerX = width / 2;
