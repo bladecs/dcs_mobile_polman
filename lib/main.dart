@@ -1,3 +1,4 @@
+import 'package:dcs_polman_kkn/pages/detail_document.dart';
 import 'package:dcs_polman_kkn/widgets/bottom_nav_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:dcs_polman_kkn/pages/document.dart';
@@ -12,9 +13,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
@@ -30,33 +32,66 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  late int _currentIndex = 0;
+  int _currentIndex = 0;
+  String? _activePopupType;
+
+  // Navigator key untuk masing-masing tab
+  final List<GlobalKey<NavigatorState>> _navigatorKeys = [
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+  ];
+
+  List<Widget> _buildPages() {
+    return [
+      _buildNavigator(_navigatorKeys[0], const DaftarDocumentContent()),
+      _buildNavigator(_navigatorKeys[1], const DocumentSayaContent()),
+    ];
+  }
+
+  Widget _buildNavigator(GlobalKey<NavigatorState> key, Widget page) {
+    return Navigator(
+      key: key,
+      onGenerateRoute: (RouteSettings settings) {
+        return MaterialPageRoute(
+          builder: (_) => page,
+        );
+      },
+    );
+  }
+
+  Future<bool> _onWillPop() async {
+    final isFirstRouteInCurrentTab =
+        !await _navigatorKeys[_currentIndex].currentState!.maybePop();
+    if (isFirstRouteInCurrentTab) {
+      return true;
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            _buildTopNavBar(),
-            Expanded(
-              child: Container(
-                color: Colors.white,
+    final pages = _buildPages();
+
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              _buildTopNavBar(),
+              Expanded(
                   child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        DaftarDocumentContent()
-                      ],
-                    ),
-                  )
-              )
-            ),
-            _buildBottomNavBar()
-          ],
-        )
+                child: IndexedStack(
+                  index: _currentIndex,
+                  children: pages,
+                ),
+              )),
+              _buildBottomNavBar()
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -67,51 +102,48 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Material(
         borderRadius: BorderRadius.circular(30),
         color: Colors.transparent,
-        child: SearchAnchor(
-          builder: (BuildContext context, SearchController controller) {
-            return SearchBar(
-              backgroundColor: MaterialStatePropertyAll(Colors.white),
-              controller: controller,
-              padding: const WidgetStatePropertyAll<EdgeInsets>(
-                EdgeInsets.symmetric(horizontal: 16),
+        child: Container(
+            width: double.infinity,
+            height: 60,
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    offset: Offset(0, 0),
+                    blurRadius: 4,
+                    spreadRadius: 2,
+                    color: Colors.black.withOpacity(0.1),
+                  )
+                ]),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.notifications_active_outlined,
+                    color: Color(0xFF13A79B),
+                  ),
+                  Container(
+                    width: 40,
+                    height: 50,
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: [
+                          BoxShadow(
+                            offset: Offset(0, 0),
+                            blurRadius: 4,
+                            spreadRadius: 2,
+                            color: Colors.black.withOpacity(0.1),
+                          )
+                        ]),
+                  )
+                ],
               ),
-              onTap: () {
-                controller.openView();
-              },
-              onChanged: (_) {
-                controller.openView();
-              },
-              leading: Icon(
-                Icons.search,
-                color: Color(0xFF13A79B),
-              ),
-              trailing: <Widget>[
-                Tooltip(
-                  message: 'Notification',
-                  child: IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.notifications_active_outlined,
-                        color: Color(0xFF13A79B),
-                      )),
-                ),
-              ],
-            );
-          },
-          suggestionsBuilder:
-              (BuildContext context, SearchController controller) {
-            return List.generate(5, (int index) {
-              final String item = 'Item $index';
-              return ListTile(
-                title: Text(item),
-                onTap: () {
-                  controller.closeView(item);
-                  controller.text = item;
-                },
-              );
-            });
-          },
-        ),
+            )),
       ),
     );
   }
@@ -137,10 +169,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 icon: Icons.person_3_outlined,
                 label: 'Users',
                 currentIndex: _currentIndex,
-                index: 1,
+                isPopupButton: true,
+                popupType: 'user',
+                activePopupType: _activePopupType,
                 onPressed: (val) {
                   setState(() {
                     _currentIndex = val;
+                    _activePopupType = 'user';
                   });
                 },
               ),
@@ -152,6 +187,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: (val) {
                   setState(() {
                     _currentIndex = val;
+                    _activePopupType = null;
                   });
                 },
               ),
@@ -159,10 +195,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 icon: Icons.note_add_outlined,
                 label: 'Doc',
                 currentIndex: _currentIndex,
-                index: 2,
+                isPopupButton: true,
+                popupType: 'document',
+                activePopupType: _activePopupType,
                 onPressed: (val) {
                   setState(() {
                     _currentIndex = val;
+                    _activePopupType = 'document';
                   });
                 },
               ),

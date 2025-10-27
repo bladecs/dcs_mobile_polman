@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:dcs_polman_kkn/config/size_config.dart';
 
@@ -6,33 +7,44 @@ class BottomNavBtn extends StatelessWidget {
     super.key,
     required this.icon,
     required this.label,
-    required this.index,
+    this.index,
     required this.currentIndex,
     required this.onPressed,
+    this.isPopupButton = false,
+    this.popupType,
+    this.activePopupType,
   });
 
   final IconData icon;
   final String label;
-  final int index;
+  final int? index;
   final int currentIndex;
   final Function(int) onPressed;
+  final bool isPopupButton;
+  final String? popupType;
+  final String? activePopupType;
 
   final GlobalKey _key = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     AppSizes().initSizes(context);
-    final bool isActive = currentIndex == index;
+    final bool isActive = currentIndex == index ||
+        (isPopupButton && popupType == activePopupType);
 
     return Container(
       key: _key,
       child: InkWell(
         onTap: () {
-          if (index == 1 || index == 2) {
-            onPressed(index);
-            _showPopupAboveButtonUser(context);
+          if (isPopupButton) {
+            if (popupType == 'user') {
+              _showPopupAboveButtonUser(context);
+            }
+            else if (popupType == 'document') {
+              _showPopupAboveButtonDocument(context);
+            }
           } else {
-            onPressed(index);
+            onPressed(index!);
           }
         },
         child: AnimatedContainer(
@@ -95,7 +107,7 @@ class BottomNavBtn extends StatelessWidget {
   void _showPopupAboveButtonUser(BuildContext context) {
     final RenderBox renderBox = _key.currentContext!.findRenderObject() as RenderBox;
     final Offset offset = renderBox.localToGlobal(Offset.zero);
-    final Size size = renderBox.size;
+    final size = renderBox.size;
 
     showMenu(
       context: context,
@@ -108,15 +120,57 @@ class BottomNavBtn extends StatelessWidget {
       items: [
         PopupMenuItem(
           child: _popupItem(Icons.person_outline, 'Users'),
-          onTap: () => onPressed(10),
+          onTap: () => onPressed(3),
         ),
         PopupMenuItem(
           child: _popupItem(Icons.admin_panel_settings_outlined, 'Roles'),
-          onTap: () => onPressed(11),
+          onTap: () => onPressed(4),
         ),
         PopupMenuItem(
           child: _popupItem(Icons.verified_user_outlined, 'Permission'),
-          onTap: () => onPressed(12),
+          onTap: () => onPressed(5),
+        ),
+      ],
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+    );
+  }
+
+  void _showPopupAboveButtonDocument(BuildContext context) {
+    final RenderBox renderBox = _key.currentContext!.findRenderObject() as RenderBox;
+    final Offset offset = renderBox.localToGlobal(Offset.zero);
+    final size = renderBox.size;
+
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        offset.dx - 25,
+        offset.dy - size.height * 4.5,
+        offset.dx + size.width,
+        offset.dy,
+      ),
+      items: [
+        PopupMenuItem(
+          child: _popupItem(Icons.sell_outlined, 'Kategori'),
+          onTap: () => onPressed(6),
+        ),
+        PopupMenuItem(
+          child: _popupItem(Icons.edit_document, 'Dokumen'),
+          onTap: () => onPressed(0),
+        ),
+        PopupMenuItem(
+          child: _popupItem(Icons.folder_open_outlined, 'My Dokumen'),
+          onTap: () => onPressed(1),
+        ),
+        PopupMenuItem(
+          child: _popupItem(Icons.verified_outlined, 'Pengesahan'),
+          onTap: () => onPressed(9),
+        ),
+        PopupMenuItem(
+          child: _popupItem(Icons.history, 'Riwayat'),
+          onTap: () => onPressed(10),
         ),
       ],
       color: Colors.white,

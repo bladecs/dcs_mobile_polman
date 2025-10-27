@@ -35,15 +35,6 @@ class _DocumentSayaContentState extends State<DocumentSayaContent> {
 
   List<Map<String, String>> get filteredData {
     List<Map<String, String>> result = List.from(dummyData);
-    if (selectedFilter == 'Dokumen Aktif') {
-      result = result.where((doc) => doc['status'] == 'Aktif').toList();
-    } else if (selectedFilter == 'Dokumen Arsip') {
-      result = result.where((doc) => doc['status'] == 'Arsip').toList();
-    } else if (selectedFilter == 'Favorit') {
-      // Contoh filter favorit (dummy)
-      result = result.where((doc) => int.parse(doc['judul']!.split(' ')[2]) % 3 == 0).toList();
-    }
-
     return result;
   }
   List<Map<String, String>> get currentPageData {
@@ -72,9 +63,9 @@ class _DocumentSayaContentState extends State<DocumentSayaContent> {
             borderRadius: BorderRadius.circular(15),
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withOpacity(0.1),
                   spreadRadius: 2,
-                  blurRadius: 10,
+                  blurRadius: 4,
                   offset: const Offset(0, 0))
             ]),
         padding: const EdgeInsets.all(20),
@@ -82,7 +73,7 @@ class _DocumentSayaContentState extends State<DocumentSayaContent> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              'Daftar Dokumen',
+              'Dokumen Anda',
               style: TextStyle(
                 color: const Color(0xFF13A79B),
                 fontWeight: FontWeight.bold,
@@ -187,43 +178,30 @@ class _DocumentSayaContentState extends State<DocumentSayaContent> {
                 ),
                 const SizedBox(width: 5),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  width: 180,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
+                  child: ElevatedButton(
+                      onPressed: (){},
+                      child: const Text('add'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: mainColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
                       ),
-                    ],
-                    borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: selectedFilter,
-                      hint: Text(
-                        'Pilih filter',
-                        style: TextStyle(color: Colors.grey[600]),
+                ),
+                Container(
+                  child: ElevatedButton(
+                      onPressed: (){},
+                      child: const Text('edit'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF36CFEB),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
                       ),
-                      iconEnabledColor: mainColor,
-                      isExpanded: true,
-                      items: filterOptions.map((String option) {
-                        return DropdownMenuItem<String>(
-                          value: option,
-                          child: Text(
-                            option,
-                            style: const TextStyle(color: Colors.black),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedFilter = value!;
-                          currentPage = 1;
-                        });
-                      },
                     ),
                   ),
                 ),

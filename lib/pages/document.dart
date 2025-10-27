@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_file_downloader/flutter_file_downloader.dart';
+import 'package:dcs_polman_kkn/pages/detail_document.dart';
 
 class DaftarDocumentContent extends StatefulWidget {
   const DaftarDocumentContent({super.key});
@@ -52,11 +54,44 @@ class _DaftarDocumentContentState extends State<DaftarDocumentContent> {
       endIndex > filteredData.length ? filteredData.length : endIndex,
     );
   }
+  InputDecoration _readOnlyDecoration(String value) {
+    return InputDecoration(
+      hintText: value,
+      filled: true,
+      fillColor: const Color(0xFFEFF3F8),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide.none,
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+    );
+  }
 
   @override
   void initState() {
     super.initState();
     selectedFilter = filterOptions[0];
+  }
+
+  void _downloadFile(String url) {
+    FileDownloader.downloadFile(
+      url: url,
+      onProgress: (fileName, progress) {
+        print('Progress: $progress%');
+      },
+      onDownloadCompleted: (filePath) {
+        debugPrint('Download selesai: $filePath');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('File berhasil diunduh: $filePath')),
+        );
+      },
+      onDownloadError: (error) {
+        debugPrint('Error download: $error');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Download gagal: $error')),
+        );
+      },
+    );
   }
 
   @override
@@ -287,7 +322,11 @@ class _DaftarDocumentContentState extends State<DaftarDocumentContent> {
                                 _DataCell(text: data['pengunggah']!),
                                 _ActionCell(
                                   onDetail: () {
-                                    _showDetailDialog(index + 1);
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => const DetailDocumentContent(),
+                                      ),
+                                    );
                                   },
                                   onRevisi: () {
                                     _showRevisiDialog(index + 1);
@@ -312,33 +351,94 @@ class _DaftarDocumentContentState extends State<DaftarDocumentContent> {
     );
   }
 
-  void _showDetailDialog(int documentId) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Detail Dokumen $documentId'),
-          content: Text('Ini adalah detail untuk dokumen $documentId'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Tutup'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void _showRevisiDialog(int documentId) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Revisi Dokumen $documentId'),
-          content: Text('Fitur revisi untuk dokumen $documentId'),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24), // untuk atur jarak dari tepi layar
+          contentPadding: const EdgeInsets.all(20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Tolak Dokumen',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          ),
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: 700,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildReadOnlyField('ID Dokumen', documentId.toString()),
+                  const SizedBox(height: 16),
+                  _buildReadOnlyField('Judul', 'Laporan Keuangan Bulanan'),
+                  const SizedBox(height: 16),
+                  _buildReadOnlyField('Kategori', 'Laporan Bulanan'),
+                  const SizedBox(height: 16),
+                  _buildReadOnlyField('Pengunggah', 'PJ Program'),
+                  const SizedBox(height: 16),
+                  Text('Berkas Donwload',style: TextStyle(fontWeight: FontWeight.bold),),
+                  const SizedBox(height: 6),
+                  InkWell(
+                    onTap: () {
+                      _downloadFile('https://drive.usercontent.google.com/download?id=1BQyFDKPOCcv63z5SX8ROAHW0FXkU9p4Q&export=download&authuser=0&confirm=t&uuid=9959e306-c6e6-470b-998e-8743cd5375f9&at=AKSUxGNC45L-np345lS1sxui7-av:1761529025909'); // Ganti URL dengan file kamu
+                    },
+                    child: const Text(
+                      'Download Dokumen',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  RichText(
+                    text: TextSpan(
+                      text: 'Alasan Pengajuan Revisi ',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        fontSize: 16,
+                      ),
+                      children: const [
+                        TextSpan(
+                          text: '*',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+                  TextField(
+                    maxLines: 4,
+                    decoration: InputDecoration(
+                      hintText: 'Tuliskan alasan revisi...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actionsPadding: const EdgeInsets.only(right: 16, bottom: 8),
           actions: [
             TextButton(
               onPressed: () {
@@ -348,6 +448,7 @@ class _DaftarDocumentContentState extends State<DaftarDocumentContent> {
             ),
             ElevatedButton(
               onPressed: () {
+                // Aksi revisi
                 Navigator.of(context).pop();
               },
               child: const Text('Revisi'),
@@ -355,6 +456,23 @@ class _DaftarDocumentContentState extends State<DaftarDocumentContent> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildReadOnlyField(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 6),
+        TextField(
+          readOnly: true,
+          decoration: _readOnlyDecoration(value),
+        ),
+      ],
     );
   }
 
