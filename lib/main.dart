@@ -3,6 +3,7 @@ import 'package:dcs_polman_kkn/widgets/bottom_nav_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:dcs_polman_kkn/pages/document.dart';
 import 'package:dcs_polman_kkn/pages/my_document.dart';
+import 'package:dcs_polman_kkn/pages/user.dart';
 
 void main() {
   runApp(const MyApp());
@@ -43,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<Widget> _buildPages() {
     return [
-      _buildNavigator(_navigatorKeys[0], const DaftarDocumentContent()),
+      _buildNavigator(_navigatorKeys[0], const UsersContent()),
       _buildNavigator(_navigatorKeys[1], const DocumentSayaContent()),
     ];
   }
